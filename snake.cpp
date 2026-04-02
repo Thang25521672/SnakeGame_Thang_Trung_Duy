@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <cstdlib>
 #include <conio.h>
+#include <ctime>
 using namespace std;
 
 #define MINX 2
@@ -33,28 +34,50 @@ public:
         A[1].x = 11; A[1].y = 10;
         A[2].x = 12; A[2].y = 10;
     }
-    void Ve(){
+    void Ve(Point Qua){
         for (int i = 0; i < DoDai; i++){
             gotoxy(A[i].x,A[i].y);
             cout<<"X";
         }
+        gotoxy(Qua.x, Qua.y); 
+        cout << "*";
     }
-    void DiChuyen(int Huong){
+    void DiChuyen(int Huong,Point& Qua){
         for (int i = DoDai-1; i>0;i--)
             A[i] = A[i-1];
         if (Huong==0) A[0].x = A[0].x + 1;
         if (Huong==1) A[0].y = A[0].y + 1;
         if (Huong==2) A[0].x = A[0].x - 1;
         if (Huong==3) A[0].y = A[0].y - 1;
+        if (A[0].x == Qua.x && A[0].y == Qua.y) {
+            DoDai++; 
+            Qua.x = rand() % (MAXX - MINX - 1) + MINX + 1;
+            Qua.y = rand() % (MAXY - MINY - 1) + MINY + 1;
+        }
 
+    }
+    bool KiemTraThua() {
+        if (A[0].x <= MINX || A[0].x >= MAXX || A[0].y <= MINY || A[0].y >= MAXY) {
+            return true;
+        }
+        for (int i = 1; i < DoDai; i++) {
+            if (A[0].x == A[i].x && A[0].y == A[i].y) {
+                return true;
+            }
+        }
+        return false;
     }
 };
 
 int main()
 {
+    srand((unsigned int)time(NULL));
     CONRAN r;
     int Huong = 0;
     char t;
+    Point Qua;
+    Qua.x = rand() % (MAXX - MINX - 1) + MINX + 1;
+    Qua.y = rand() % (MAXY - MINY - 1) + MINY + 1;
 
     while (1){
         if (kbhit()){
@@ -66,8 +89,13 @@ int main()
         }
         system("cls");
         VeKhung();
-        r.Ve();
-        r.DiChuyen(Huong);
+        r.Ve(Qua);
+        r.DiChuyen(Huong,Qua);
+        if (r.KiemTraThua()) {
+            gotoxy(10, MAXY + 2);
+            cout << "=== GAME OVER ===" << endl;
+            break; 
+        }
         Sleep(300);
     } 
     return 0;
