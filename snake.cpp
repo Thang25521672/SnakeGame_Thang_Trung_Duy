@@ -10,54 +10,60 @@ using namespace std;
 #define MAXX 35
 #define MAXY 20
 
+void gotoxy(int x, int y){
+  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+  _COORD pos;
+  pos.X = x;
+  pos.Y = y;
+  SetConsoleCursorPosition(hConsole, pos);
+}
+
 void VeKhung(){
     for (int i = MINX; i <= MAXX; i++){
         for (int j = MINY; j <= MAXY; j++){
             if ((i == MINX) || (i == MAXX) || (j == MINY) || (j == MAXY)){
-                gotoxy(i, j);
+                gotoxy(i * 2, j);
                 printf("+");
             }
         }
     }
 }
-void gotoxy( int column, int line );
+
 struct Point{
     int x,y;
 };
-class CONRAN{
-public:
-    struct Point A[100];
-    int DoDai;
-    CONRAN(){
-        DoDai = 3;
-        A[0].x = 10; A[0].y = 10;
-        A[1].x = 11; A[1].y = 10;
-        A[2].x = 12; A[2].y = 10;
-    }
-    void Ve(Point Qua){
-        for (int i = 0; i < DoDai; i++){
-            gotoxy(A[i].x,A[i].y);
-            cout<<"X";
-        }
-        gotoxy(Qua.x, Qua.y); 
-        cout << "*";
-    }
-    void DiChuyen(int Huong,Point& Qua){
-        for (int i = DoDai-1; i>0;i--)
-            A[i] = A[i-1];
-        if (Huong==0) A[0].x = A[0].x + 1;
-        if (Huong==1) A[0].y = A[0].y + 1;
-        if (Huong==2) A[0].x = A[0].x - 1;
-        if (Huong==3) A[0].y = A[0].y - 1;
-        if (A[0].x == Qua.x && A[0].y == Qua.y) {
-            DoDai++; 
-            Qua.x = rand() % (MAXX - MINX - 1) + MINX + 1;
-            Qua.y = rand() % (MAXY - MINY - 1) + MINY + 1;
-        }
 
+class CONRAN{
+private:
+	Point A[100];
+    int DoDai;
+public:
+    void banDau(){
+        this->DoDai = 3;
+        this->A[0].x = 9; this->A[0].y = 5;
+        this->A[1].x = 8; this->A[1].y = 5;
+        this->A[2].x = 7; this->A[2].y = 5;
     }
-    bool KiemTraThua() {
-        if (A[0].x <= MINX || A[0].x >= MAXX || A[0].y <= MINY || A[0].y >= MAXY) {
+    void Ve(){
+    	int i;
+        for (i = 0; i < this->DoDai; i++){
+            gotoxy(this->A[i].x * 2, this->A[i].y);
+            cout << char(219) << char(219);
+        }
+        gotoxy(this->A[i].x * 2, this->A[i].y);
+        cout << "  ";
+    }
+    void DiChuyen(int Huong){
+        for (int i = DoDai; i > 0;i--)
+            A[i] = A[i-1];
+        
+        if (Huong == 0) A[0].x = A[0].x + 1;
+        if (Huong == 1) A[0].y = A[0].y + 1;
+        if (Huong == 2) A[0].x = A[0].x - 1;
+        if (Huong == 3) A[0].y = A[0].y - 1;
+    }
+    bool KiemTraThua(){
+        if (A[0].x < MINX || A[0].x > MAXX - 1 || A[0].y <= MINY || A[0].y >= MAXY) {
             return true;
         }
         for (int i = 1; i < DoDai; i++) {
@@ -69,30 +75,27 @@ public:
     }
 };
 
-int main()
-{
-    srand((unsigned int)time(NULL));
-    CONRAN r;
+int main(){
+    CONRAN snake;
     int Huong = 0;
+    snake.banDau();
+    snake.Ve();
+    VeKhung();
     char t;
-    Point Qua;
-    Qua.x = rand() % (MAXX - MINX - 1) + MINX + 1;
-    Qua.y = rand() % (MAXY - MINY - 1) + MINY + 1;
-
     while (1){
         if (kbhit()){
             t = getch();
-            if (t=='a') Huong = 2;
-            if (t=='w') Huong = 3;
-            if (t=='d') Huong = 0;
-            if (t=='x') Huong = 1;
+            if (t == 'd' && Huong != 2) Huong = 0;
+            if (t == 's' && Huong != 3) Huong = 1;
+            if (t == 'a' && Huong != 0) Huong = 2;
+            if (t == 'w' && Huong != 1) Huong = 3;
         }
-        system("cls");
-        VeKhung();
-        r.Ve(Qua);
-        r.DiChuyen(Huong,Qua);
-        if (r.KiemTraThua()) {
-            gotoxy(10, MAXY + 2);
+        snake.Ve();
+        snake.DiChuyen(Huong);
+        Sleep(200);
+        if (snake.KiemTraThua()) {
+        	int centerX = (MINX + MAXX) / 2;
+            gotoxy(centerX * 2 - 8, MAXY + 2);
             cout << "=== GAME OVER ===" << endl;
             break; 
         }
@@ -101,14 +104,3 @@ int main()
     return 0;
 }
 
-
-void gotoxy( int column, int line )
-  {
-  COORD coord;
-  coord.X = column;
-  coord.Y = line;
-  SetConsoleCursorPosition(
-    GetStdHandle( STD_OUTPUT_HANDLE ),
-    coord
-    );
-  }
