@@ -37,6 +37,7 @@ class CONRAN{
 private:
 	Point A[100];
     int DoDai;
+    Point duoiCu;
 public:
     void banDau(){
         this->DoDai = 3;
@@ -44,28 +45,44 @@ public:
         this->A[1].x = 8; this->A[1].y = 5;
         this->A[2].x = 7; this->A[2].y = 5;
     }
-    void Ve(){
+    void Ve(Point Qua){
+    	gotoxy(Qua.x * 2, Qua.y);
+    	cout << "O";
+    	
     	int i;
         for (i = 0; i < this->DoDai; i++){
             gotoxy(this->A[i].x * 2, this->A[i].y);
             cout << char(219) << char(219);
         }
-        gotoxy(this->A[i].x * 2, this->A[i].y);
+        gotoxy(duoiCu.x * 2, duoiCu.y);
         cout << "  ";
     }
-    void DiChuyen(int Huong){
-        for (int i = DoDai; i > 0;i--)
+    void DiChuyen(int Huong, Point &Qua){
+    	duoiCu = A[DoDai - 1];
+    	
+        for (int i = DoDai; i > 0; i--)
             A[i] = A[i-1];
         
         if (Huong == 0) A[0].x = A[0].x + 1;
         if (Huong == 1) A[0].y = A[0].y + 1;
         if (Huong == 2) A[0].x = A[0].x - 1;
         if (Huong == 3) A[0].y = A[0].y - 1;
+        
+        if (A[0].x == Qua.x && A[0].y == Qua.y){
+        	if (DoDai < 100)
+        	    DoDai++;
+		
+		Qua.x = rand() % (MAXX - MINX - 1) + MINX + 1;
+		Qua.y = rand() % (MAXY - MINY - 1) + MINY + 1;
+	    }
     }
     bool KiemTraThua(){
+    	//kiem tra dam tuong
         if (A[0].x < MINX || A[0].x > MAXX - 1 || A[0].y <= MINY || A[0].y >= MAXY) {
             return true;
         }
+        
+        //kiem tra tu can minh
         for (int i = 1; i < DoDai; i++) {
             if (A[0].x == A[i].x && A[0].y == A[i].y) {
                 return true;
@@ -76,31 +93,36 @@ public:
 };
 
 int main(){
+	srand(time(NULL));
+	
     CONRAN snake;
     int Huong = 0;
+    
+    Point Qua;
+    Qua.x = 15; Qua.y = 10;
+    
     snake.banDau();
-    snake.Ve();
+    
+    system("cls");
     VeKhung();
-    char t;
+    
     while (1){
         if (kbhit()){
-            t = getch();
+            char t = getch();
             if (t == 'd' && Huong != 2) Huong = 0;
             if (t == 's' && Huong != 3) Huong = 1;
             if (t == 'a' && Huong != 0) Huong = 2;
             if (t == 'w' && Huong != 1) Huong = 3;
         }
-        snake.Ve();
-        snake.DiChuyen(Huong);
-        Sleep(200);
+        snake.Ve(Qua);
+        snake.DiChuyen(Huong, Qua);
         if (snake.KiemTraThua()) {
         	int centerX = (MINX + MAXX) / 2;
             gotoxy(centerX * 2 - 8, MAXY + 2);
             cout << "=== GAME OVER ===" << endl;
             break; 
         }
-        Sleep(300);
+        Sleep(150);
     } 
     return 0;
 }
-
